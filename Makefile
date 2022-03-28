@@ -19,3 +19,9 @@ run_all : run_all.o
 
 %.o : %.c
 	gcc -Wall -g -c $^
+
+clear : clear_database
+	rm *.o
+	rm run_all
+	rm server
+	rm client
