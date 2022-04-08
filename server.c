@@ -15,7 +15,7 @@
 
 void file_writer(char *data, int size, FILE *file, int start){
     int end = time(NULL);
-    int curr = end  - start;
+    int curr = 2 * (end  - start);
 
     // printf("writing = %s\n", loc + 1);
     fwrite(data, strlen(data), sizeof(char), file);
@@ -97,7 +97,6 @@ int main() {
             FD_SET(client_socket, &allset);
 
             // printf("connection from %s\n", inet_ntoa(client_addr.sin_addr));
-            
             if (read(client_socket, line, 35) == -1){
                 perror("read");
                 exit(1);

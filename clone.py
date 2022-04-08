@@ -80,12 +80,12 @@ def read_csv(data: str) -> Dict[str, List[List[float]]]:
         s_line = line.split(sep=" ")
         name, data = s_line
         val, t = data.split(sep=",")
-        read_dict[name][0].append(int(t))
-        read_dict[name][1].append(float(val[:-1]))
+        read_dict[name][0].append(int(t[:-1]))
+        read_dict[name][1].append(float(val))
 
         # Sets the boundaries to only show 60 data points
-        if len(read_dict[name][0]) > 60:
-            read_dict[name][0].pop(0)
+        if read_dict[name][0][-1] > 60:
+            read_dict[name][0].pop()
             read_dict[name][1].pop(0)
 
         line = file.readline()
@@ -151,4 +151,5 @@ def is_safe(values):
 # Graph animation
 anim = animation.FuncAnimation(fig, animate, interval=20, blit=True)
 
-mainloop()
+root.mainloop()
+# anim.save(filename="test.mp4")
