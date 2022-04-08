@@ -28,7 +28,7 @@ image_canvas.grid(row = 2, column = 0)
 
 # Safety description
 lbl_image = Label(root, justify="center", text="", font=("Arial", 25))
-lbl_image.grid(row = 3, column = 0)
+lbl_image.grid(row=3, column=0)
 
 # Setting up the graph
 fig = plt.Figure(figsize=(min(screen_width, screen_height) / 100, min(screen_width, screen_height) / 100), dpi=100)
