@@ -3,10 +3,19 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import pyplot as plt, animation
 import csv
 from PIL import ImageTk,Image
+from typing import Dict, List
 
 # Global vars
 threshold = 2
 img = None
+names = ["data1.csv", "data2.csv", "data3.csv", "data4.csv", "data5.csv"]
+lc = {
+    "data1.csv": "b-",
+    "data2.csv": "y-",
+    "data3.csv": "g-",
+    "data4.csv": "r-",
+    "data5.csv": "-"
+}
 
 # Create tkinter window
 root = Tk()
@@ -50,37 +59,66 @@ canvas.draw()
 canvas.get_tk_widget().grid(row = 2, column = 1)
 
 
-# Opens a csv file into a list
-def read_csv(file_name, index):
-    y_vals = []
-    with open(file_name, newline="") as file:
-        reader = csv.reader(file, delimiter=' ', quotechar='|')
-        for row in reader:
-            num = row[0]
-            num = round(float(num),2)
-            y_vals.append(num)
-    return y_vals[index : index+60]
+# # Opens a csv file into a list
+# def read_csv(file_name, index):
+#     y_vals = []
+#     with open(file_name, newline="") as file:
+#         reader = csv.reader(file, delimiter=' ', quotechar='|')
+#         for row in reader:
+#             num = row[0]
+#             num = round(float(num),2)
+#             y_vals.append(num)
+#     return y_vals[index : index+60]
+
+
+def read_csv(data: str) -> Dict[str, List[List[float]]]:
+    read_dict = {name_id: [[], []] for name_id in names}
+    file = open(data, 'r')
+
+    line = file.readline()
+    while line != '':
+        s_line = line.split(sep=" ")
+        name, data = s_line
+        val, t = data.split(sep=",")
+        read_dict[name][0].append(int(t))
+        read_dict[name][1].append(float(val[:-1]))
+
+        # Sets the boundaries to only show 60 data points
+        if len(read_dict[name][0]) > 60:
+            read_dict[name][0].pop(0)
+            read_dict[name][1].pop(0)
+
+        line = file.readline()
+    return read_dict
 
 
 # Animates the graph
 def animate(i):
     global threshold
 
+    data = read_csv('database.db')
+
     # Reads data
-    x = [j for j in range(60)]
-    y = read_csv("data1.csv", i)
-    y2 = read_csv("data2.csv", i)
-    y3 = read_csv("data3.csv", i)
-    y4 = read_csv("data4.csv", i)
-    y5 = read_csv("data5.csv", i)
+    # x = [j for j in range(60)]
+    # y = read_csv("data1.csv", i)
+    # y2 = read_csv("data2.csv", i)
+    # y3 = read_csv("data3.csv", i)
+    # y4 = read_csv("data4.csv", i)
+    # y5 = read_csv("data5.csv", i)
+
+    y = data[names[0]][1]
+    y2 = data[names[1]][1]
+    y3 = data[names[2]][1]
+    y4 = data[names[3]][1]
+    y5 = data[names[4]][1]
 
     # Updates the lines
-    threshold_line.set_data(x, [threshold for _ in range(60)])
-    line.set_data(x, y)
-    line2.set_data(x, y2)
-    line3.set_data(x, y3)
-    line4.set_data(x, y4)
-    line5.set_data(x, y5)
+    threshold_line.set_data([j for j in range(60)], [threshold for _ in range(60)])
+    line.set_data(data[names[0]][0], y)
+    line2.set_data(data[names[1]][0], y2)
+    line3.set_data(data[names[2]][0], y3)
+    line4.set_data(data[names[3]][0], y4)
+    line5.set_data(data[names[4]][0], y5)
 
     # Determine which picture to load
     global img
@@ -90,7 +128,8 @@ def animate(i):
     else:
         img = Image.open("exclaim.jpg")
 
-    resized_image = img.resize((min(screen_width, screen_height),min(screen_width, screen_height)))
+    resized_image = img.resize((min(screen_width, screen_height),
+                                min(screen_width, screen_height)))
 
     img = ImageTk.PhotoImage(resized_image)
 

@@ -7,14 +7,20 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #ifndef PORT
 #define PORT 54321
 #endif
 
-void file_writer(char *data, int size, FILE *file){
+void file_writer(char *data, int size, FILE *file, int start){
+    int end = time(NULL);
+    int curr = end  - start;
+
     // printf("writing = %s\n", loc + 1);
     fwrite(data, strlen(data), sizeof(char), file);
+    fwrite(",", 1, sizeof(char), file);
+    fprintf(file, "%d", curr);
     fwrite("\n", 1, sizeof(char), file);
     fflush(file);
 }
@@ -68,6 +74,8 @@ int main() {
 
     FILE *file = fopen("database.db", "a");
 
+    int starttime = time(NULL);
+
     while (1){
         read_set = allset;
 
@@ -95,7 +103,7 @@ int main() {
                 exit(1);
             }
 
-            file_writer(line, strlen(line), file);
+            file_writer(line, strlen(line), file, starttime);
             if (write(client_socket, "w", 2) == -1){
                 perror("write");
                 exit(1);

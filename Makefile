@@ -1,6 +1,6 @@
 all : server client run_all
 
-PORT = 50625
+PORT = 52035
 
 client : client.o
 	gcc -Wall -g -DPORT=${PORT} -o client client.o

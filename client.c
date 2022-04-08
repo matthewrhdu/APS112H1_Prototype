@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 
         char dump[2];
         read(soc, dump, 2);
-        usleep(1 * 1e5);
+        sleep(1);
         close(soc);
     }
 
