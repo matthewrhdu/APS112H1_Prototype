@@ -23,8 +23,12 @@ lbl_intro_desc = Label(root, justify="center", wraplength=500, text="Lorem ipsum
 lbl_safe_desc = Label(root, justify="center", wraplength=500, text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum").grid(column=1, row=1)
 
 # The canvas for the image
-image_canvas = Canvas(root, width=min(screen_width, screen_height), height=min(screen_width, screen_height))
+image_canvas = Canvas(root, width=(min(screen_width, screen_height)-50), height=(min(screen_width, screen_height)-50))
 image_canvas.grid(row = 2, column = 0)
+
+# Safety description
+lbl_image = Label(root, justify="center", text="", font=("Arial", 25))
+lbl_image.grid(row = 3, column = 0)
 
 # Setting up the graph
 fig = plt.Figure(figsize=(min(screen_width, screen_height) / 100, min(screen_width, screen_height) / 100), dpi=100)
@@ -47,7 +51,7 @@ ax.legend()
 # The canvas for the graph
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
-canvas.get_tk_widget().grid(row = 2, column = 1)
+canvas.get_tk_widget().grid(row = 2, column = 1, rowspan=2)
 
 
 # Opens a csv file into a list
@@ -84,13 +88,16 @@ def animate(i):
 
     # Determine which picture to load
     global img
-    values = y + y2 + y3 + y4 + y5
+    values = [y[-1], y2[-1], y3[-1], y4[-1], y5[-1]]
+
     if is_safe(values):
         img = Image.open("thumbsup.jpg")
+        lbl_image["text"] = "The library is SAFE"
     else:
         img = Image.open("exclaim.jpg")
+        lbl_image["text"] = "The library is NOT SAFE"
 
-    resized_image = img.resize((min(screen_width, screen_height),min(screen_width, screen_height)))
+    resized_image = img.resize((min(screen_width, screen_height)-50,min(screen_width, screen_height)-50))
 
     img = ImageTk.PhotoImage(resized_image)
 
