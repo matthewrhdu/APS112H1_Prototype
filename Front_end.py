@@ -3,6 +3,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import pyplot as plt, animation
 import csv
 from PIL import ImageTk,Image
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# To send warning emails
+gmailUser = 'aps112team144@gmail.com'
+gmailPassword = 'tutorial0126'
+recipients = ['team144test1@gmail.com', 'team144test2@gmail.com']
+time_under_threshold = [0, 0, 0, 0, 0]
 
 # Global vars
 threshold = 2
@@ -32,7 +41,7 @@ lbl_image.grid(row = 3, column = 0)
 
 # Setting up the graph
 fig = plt.Figure(figsize=(min(screen_width, screen_height) / 100, min(screen_width, screen_height) / 100), dpi=100)
-ax = fig.add_subplot(xlim=(0, 60), ylim=(-55, 55))
+ax = fig.add_subplot(xlim=(0, 60), ylim=(0, 10))
 ax.set_title('Riverdale Air Exchange Rate')
 ax.set_xlabel('Last 60 minutes')
 ax.set_ylabel('Air changes per hour')
@@ -69,6 +78,7 @@ def read_csv(file_name, index):
 # Animates the graph
 def animate(i):
     global threshold
+    global time_under_threshold
 
     # Reads data
     x = [j for j in range(60)]
@@ -90,12 +100,68 @@ def animate(i):
     global img
     values = [y[-1], y2[-1], y3[-1], y4[-1], y5[-1]]
 
-    if is_safe(values):
+    global time_under_threshold
+    safe, units = is_safe(values)
+
+    if safe:
+        # Change the picture
         img = Image.open("thumbsup.jpg")
         lbl_image["text"] = "The library is SAFE"
+        time_under_threshold = [0,0,0,0,0]
     else:
+        # Change the picture
         img = Image.open("exclaim.jpg")
         lbl_image["text"] = "The library is NOT SAFE"
+    
+        # Sending a warning email
+        for i, x in enumerate(units):
+            # Record time under threshold
+            if x == 1:
+                time_under_threshold[i] += 1
+            else:
+                time_under_threshold[i] = 0
+
+            # Decide which message to send
+            if time_under_threshold[i] == 1:
+                message = "Warning, unit " + str(i + 1) + " has gone under the threshold for safe air exchange."
+
+                msg = MIMEMultipart()
+                msg['From'] = f'"Team 144" <{gmailUser}>'
+                msg['To'] = ", ".join(recipients)
+                msg['Subject'] = "Riverdale Air Exchange Warning"
+                msg.attach(MIMEText(message))
+
+                try:
+                    mailServer = smtplib.SMTP('smtp.gmail.com', 587)
+                    mailServer.ehlo()
+                    mailServer.starttls()
+                    mailServer.ehlo()
+                    mailServer.login(gmailUser, gmailPassword)
+                    mailServer.sendmail(gmailUser, recipients, msg.as_string())
+                    mailServer.close()
+                    print ('Email sent!')
+                except:
+                    print ('Something went wrong...')
+            elif time_under_threshold[i] == 10:
+                message = "URGENT, unit " + str(i + 1) + " has gone under the threshold for safe air exchange for over 10 minutes."
+                
+                msg = MIMEMultipart()
+                msg['From'] = f'"Team 144" <{gmailUser}>'
+                msg['To'] = ", ".join(recipients)
+                msg['Subject'] = "Riverdale Air Exchange URGENT Warning"
+                msg.attach(MIMEText(message))
+
+                try:
+                    mailServer = smtplib.SMTP('smtp.gmail.com', 587)
+                    mailServer.ehlo()
+                    mailServer.starttls()
+                    mailServer.ehlo()
+                    mailServer.login(gmailUser, gmailPassword)
+                    mailServer.sendmail(gmailUser, recipients, msg.as_string())
+                    mailServer.close()
+                    print ('Email sent!')
+                except:
+                    print ('Something went wrong...')
 
     resized_image = img.resize((min(screen_width, screen_height)-50,min(screen_width, screen_height)-50))
 
@@ -110,13 +176,16 @@ def animate(i):
 # Check if values are above the threshold
 def is_safe(values):
     global threshold
-    for value in values:
+    times = [0,0,0,0,0]
+    safe = True
+    for i, value in enumerate(values):
         if value < threshold:
-            return False
-    return True
+            times[i] += 1
+            safe = False
+    return safe, times
 
 
 # Graph animation
-anim = animation.FuncAnimation(fig, animate, interval=20, blit=True)
+anim = animation.FuncAnimation(fig, animate, interval=50, blit=True)
 
 mainloop()
