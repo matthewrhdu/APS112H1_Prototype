@@ -74,7 +74,6 @@ def read_csv(file_name, index):
             y_vals.append(num)
     return y_vals[index : index+60]
 
-
 # Animates the graph
 def animate(i):
     global threshold
