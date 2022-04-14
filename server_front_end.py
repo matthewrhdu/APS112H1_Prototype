@@ -31,8 +31,10 @@ file1 = open("safe.txt", "r")
 file2 = open("intro.txt", "r")
 
 # Labels for descriptions
-lbl_intro_desc = Label(root, justify="center", wraplength=500, text=file2.readline(), font=("Arial", 12)).grid(column=0, row=1)
-lbl_safe_desc = Label(root, justify="center", wraplength=500, text=file1.readline(), font=("Arial", 12)).grid(column=1, row=1)
+lbl_intro_desc = Label(root, justify="center", wraplength=500, text=file2.readline(), font=("Arial", 12))\
+    .grid(column=0, row=1)
+lbl_safe_desc = Label(root, justify="center", wraplength=500, text=file1.readline(), font=("Arial", 12))\
+    .grid(column=1, row=1)
 
 file1.close()
 file2.close()
@@ -103,14 +105,6 @@ def animate(i):
     global threshold
 
     data = read_csv('database.db')
-
-    # Reads data
-    # x = [j for j in range(60)]
-    # y = read_csv("data1.csv", i)
-    # y2 = read_csv("data2.csv", i)
-    # y3 = read_csv("data3.csv", i)
-    # y4 = read_csv("data4.csv", i)
-    # y5 = read_csv("data5.csv", i)
 
     y = data[names[0]][1]
     y2 = data[names[1]][1]

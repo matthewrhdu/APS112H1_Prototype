@@ -2,10 +2,12 @@ from tkinter import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import pyplot as plt, animation
 import csv
-from PIL import ImageTk,Image
+from PIL import ImageTk, Image
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+import calculation_module as calc
 
 # To send warning emails
 gmailUser = 'aps112team144@gmail.com'
@@ -24,16 +26,25 @@ screen_width = int(root.winfo_screenwidth() / 2)
 screen_height = int(root.winfo_screenheight() / 3 * 2)
 
 # Labels for headings
-lbl_intro = Label(root, justify="left", text="Riverdale Library Air Exchange Rate", font=("Arial", 25)).grid(column=0, row=0)
+lbl_intro = Label(root, justify="left", text="Riverdale Library Air Exchange Rate", font=("Arial", 25))\
+    .grid(column=0, row=0)
 lbl_safe = Label(root, justify="right", text="What is safe?", font=("Arial", 25)).grid(column=1, row=0)
 
+file1 = open("safe.txt", "r")
+file2 = open("intro.txt", "r")
+
 # Labels for descriptions
-lbl_intro_desc = Label(root, justify="center", wraplength=500, text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum").grid(column=0, row=1)
-lbl_safe_desc = Label(root, justify="center", wraplength=500, text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum").grid(column=1, row=1)
+lbl_intro_desc = Label(root, justify="center", wraplength=500, text=file2.readline(), font=("Arial", 12))\
+    .grid(column=0, row=1)
+lbl_safe_desc = Label(root, justify="center", wraplength=500, text=file1.readline(), font=("Arial", 12))\
+    .grid(column=1, row=1)
+
+file1.close()
+file2.close()
 
 # The canvas for the image
-image_canvas = Canvas(root, width=(min(screen_width, screen_height)-50), height=(min(screen_width, screen_height)-50))
-image_canvas.grid(row = 2, column = 0)
+image_canvas = Canvas(root, width=(min(screen_width, screen_height) - 50), height=(min(screen_width, screen_height)-50))
+image_canvas.grid(row=2, column=0)
 
 # Safety description
 lbl_image = Label(root, justify="center", text="", font=("Arial", 25))
@@ -60,19 +71,21 @@ ax.legend()
 # The canvas for the graph
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
-canvas.get_tk_widget().grid(row = 2, column = 1, rowspan=2)
+canvas.get_tk_widget().grid(row=2, column=1, rowspan=2)
 
 
 # Opens a csv file into a list
 def read_csv(file_name, index):
-    y_vals = []
+    y_values = []
     with open(file_name, newline="") as file:
         reader = csv.reader(file, delimiter=' ', quotechar='|')
         for row in reader:
-            num = row[0]
-            num = round(float(num),2)
-            y_vals.append(num)
-    return y_vals[index : index+60]
+            data = row[0].split(sep=",")
+            num = calc.calculate_rate(float(data[0]), float(data[1]))
+            num = round(num, 2)
+            y_values.append(num)
+    return y_values[index:index + 60]
+
 
 # Animates the graph
 def animate(i):
@@ -106,7 +119,7 @@ def animate(i):
         # Change the picture
         img = Image.open("thumbsup.jpg")
         lbl_image["text"] = "The library is SAFE"
-        time_under_threshold = [0,0,0,0,0]
+        time_under_threshold = [0, 0, 0, 0, 0]
     else:
         # Change the picture
         img = Image.open("exclaim.jpg")
@@ -131,18 +144,19 @@ def animate(i):
                 msg.attach(MIMEText(message))
 
                 try:
-                    mailServer = smtplib.SMTP('smtp.gmail.com', 587)
-                    mailServer.ehlo()
-                    mailServer.starttls()
-                    mailServer.ehlo()
-                    mailServer.login(gmailUser, gmailPassword)
-                    mailServer.sendmail(gmailUser, recipients, msg.as_string())
-                    mailServer.close()
-                    print ('Email sent!')
-                except:
-                    print ('Something went wrong...')
+                    mail_server = smtplib.SMTP('smtp.gmail.com', 587)
+                    mail_server.ehlo()
+                    mail_server.starttls()
+                    mail_server.ehlo()
+                    mail_server.login(gmailUser, gmailPassword)
+                    mail_server.sendmail(gmailUser, recipients, msg.as_string())
+                    mail_server.close()
+                    print('Email sent!')
+                except Exception:
+                    print('Something went wrong...')
             elif time_under_threshold[i] == 10:
-                message = "URGENT, unit " + str(i + 1) + " has gone under the threshold for safe air exchange for over 10 minutes."
+                message = "URGENT, unit " + str(i + 1) + " has gone under the threshold for safe air exchange for " \
+                                                         "over 10 minutes."
                 
                 msg = MIMEMultipart()
                 msg['From'] = f'"Team 144" <{gmailUser}>'
@@ -151,23 +165,23 @@ def animate(i):
                 msg.attach(MIMEText(message))
 
                 try:
-                    mailServer = smtplib.SMTP('smtp.gmail.com', 587)
-                    mailServer.ehlo()
-                    mailServer.starttls()
-                    mailServer.ehlo()
-                    mailServer.login(gmailUser, gmailPassword)
-                    mailServer.sendmail(gmailUser, recipients, msg.as_string())
-                    mailServer.close()
-                    print ('Email sent!')
-                except:
-                    print ('Something went wrong...')
+                    mail_server = smtplib.SMTP('smtp.gmail.com', 587)
+                    mail_server.ehlo()
+                    mail_server.starttls()
+                    mail_server.ehlo()
+                    mail_server.login(gmailUser, gmailPassword)
+                    mail_server.sendmail(gmailUser, recipients, msg.as_string())
+                    mail_server.close()
+                    print('Email sent!')
+                except Exception:
+                    print('Something went wrong...')
 
-    resized_image = img.resize((min(screen_width, screen_height)-50,min(screen_width, screen_height)-50))
+    resized_image = img.resize((min(screen_width, screen_height) - 50, min(screen_width, screen_height) - 50))
 
     img = ImageTk.PhotoImage(resized_image)
 
     # Load the image
-    image_canvas.create_image(0,0, image = img, anchor="nw")
+    image_canvas.create_image(0, 0, image=img, anchor="nw")
 
     return line, line2, line3, line4, line5,
 
@@ -175,7 +189,7 @@ def animate(i):
 # Check if values are above the threshold
 def is_safe(values):
     global threshold
-    times = [0,0,0,0,0]
+    times = [0, 0, 0, 0, 0]
     safe = True
     for i, value in enumerate(values):
         if value < threshold:

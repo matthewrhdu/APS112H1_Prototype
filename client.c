@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     memset(&server.sin_zero, 0, 8);
     
     struct addrinfo *ai;
-    char *hostname = "DESKTOP-JKIOHTS";
+    char *hostname = "127.0.0.1";
 
     /* this call declares memory and populates ailist */
     getaddrinfo(hostname, NULL, NULL, &ai);
