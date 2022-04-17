@@ -73,6 +73,34 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
 canvas.get_tk_widget().grid(row=2, column=1, rowspan=2)
 
+def email(i, gmailUser, gmailPassword, recipients, second_warning):
+    if not second_warning:
+        message = "Warning, unit " + str(i + 1) + " has gone under the threshold for safe air exchange."
+        msg = MIMEMultipart()
+        msg['From'] = f'"Team 144" <{gmailUser}>'
+        msg['To'] = ", ".join(recipients)
+        msg['Subject'] = "Riverdale Air Exchange Warning"
+        msg.attach(MIMEText(message))
+    else:
+        message = "URGENT, unit " + str(i + 1) + " has gone under the threshold for safe air exchange for " \
+                                                         "over 10 minutes."
+        msg = MIMEMultipart()
+        msg['From'] = f'"Team 144" <{gmailUser}>'
+        msg['To'] = ", ".join(recipients)
+        msg['Subject'] = "Riverdale Air Exchange URGENT Warning"
+        msg.attach(MIMEText(message))
+        
+    try:
+        mail_server = smtplib.SMTP('smtp.gmail.com', 587)
+        mail_server.ehlo()
+        mail_server.starttls()
+        mail_server.ehlo()
+        mail_server.login(gmailUser, gmailPassword)
+        mail_server.sendmail(gmailUser, recipients, msg.as_string())
+        mail_server.close()
+        print('Email sent!')
+    except Exception:
+        print('Something went wrong...')
 
 # Opens a csv file into a list
 def read_csv(file_name, index):
@@ -135,46 +163,9 @@ def animate(i):
 
             # Decide which message to send
             if time_under_threshold[i] == 1:
-                message = "Warning, unit " + str(i + 1) + " has gone under the threshold for safe air exchange."
-
-                msg = MIMEMultipart()
-                msg['From'] = f'"Team 144" <{gmailUser}>'
-                msg['To'] = ", ".join(recipients)
-                msg['Subject'] = "Riverdale Air Exchange Warning"
-                msg.attach(MIMEText(message))
-
-                try:
-                    mail_server = smtplib.SMTP('smtp.gmail.com', 587)
-                    mail_server.ehlo()
-                    mail_server.starttls()
-                    mail_server.ehlo()
-                    mail_server.login(gmailUser, gmailPassword)
-                    mail_server.sendmail(gmailUser, recipients, msg.as_string())
-                    mail_server.close()
-                    print('Email sent!')
-                except Exception:
-                    print('Something went wrong...')
+                email(i, gmailUser, gmailPassword, recipients, False)
             elif time_under_threshold[i] == 10:
-                message = "URGENT, unit " + str(i + 1) + " has gone under the threshold for safe air exchange for " \
-                                                         "over 10 minutes."
-                
-                msg = MIMEMultipart()
-                msg['From'] = f'"Team 144" <{gmailUser}>'
-                msg['To'] = ", ".join(recipients)
-                msg['Subject'] = "Riverdale Air Exchange URGENT Warning"
-                msg.attach(MIMEText(message))
-
-                try:
-                    mail_server = smtplib.SMTP('smtp.gmail.com', 587)
-                    mail_server.ehlo()
-                    mail_server.starttls()
-                    mail_server.ehlo()
-                    mail_server.login(gmailUser, gmailPassword)
-                    mail_server.sendmail(gmailUser, recipients, msg.as_string())
-                    mail_server.close()
-                    print('Email sent!')
-                except Exception:
-                    print('Something went wrong...')
+                email(i, gmailUser, gmailPassword, recipients, True)
 
     resized_image = img.resize((min(screen_width, screen_height) - 50, min(screen_width, screen_height) - 50))
 
