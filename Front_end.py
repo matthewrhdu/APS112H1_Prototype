@@ -16,7 +16,7 @@ recipients = ['team144test1@gmail.com', 'team144test2@gmail.com']
 time_under_threshold = [0, 0, 0, 0, 0]
 
 # Global vars
-threshold = 2
+threshold = 4
 img = None
 
 # Create tkinter window
@@ -30,17 +30,17 @@ lbl_intro = Label(root, justify="left", text="Riverdale Library Air Exchange Rat
     .grid(column=0, row=0)
 lbl_safe = Label(root, justify="right", text="What is safe?", font=("Arial", 25)).grid(column=1, row=0)
 
-file1 = open("safe.txt", "r")
-file2 = open("intro.txt", "r")
-
-# Labels for descriptions
-lbl_intro_desc = Label(root, justify="center", wraplength=500, text=file2.readline(), font=("Arial", 12))\
-    .grid(column=0, row=1)
-lbl_safe_desc = Label(root, justify="center", wraplength=500, text=file1.readline(), font=("Arial", 12))\
-    .grid(column=1, row=1)
-
-file1.close()
-file2.close()
+# file1 = open("safe.txt", "r")
+# file2 = open("intro.txt", "r")
+#
+# # Labels for descriptions
+# lbl_intro_desc = Label(root, justify="center", wraplength=500, text=file2.readline(), font=("Arial", 12))\
+#     .grid(column=0, row=1)
+# lbl_safe_desc = Label(root, justify="center", wraplength=500, text=file1.readline(), font=("Arial", 12))\
+#     .grid(column=1, row=1)
+#
+# file1.close()
+# file2.close()
 
 # The canvas for the image
 image_canvas = Canvas(root, width=(min(screen_width, screen_height) - 50), height=(min(screen_width, screen_height)-50))
@@ -52,18 +52,18 @@ lbl_image.grid(row=3, column=0)
 
 # Setting up the graph
 fig = plt.Figure(figsize=(min(screen_width, screen_height) / 100, min(screen_width, screen_height) / 100), dpi=100)
-ax = fig.add_subplot(xlim=(0, 60), ylim=(0, 10))
+ax = fig.add_subplot(xlim=(0, 60), ylim=(3, 7))
 ax.set_title('Riverdale Air Exchange Rate')
 ax.set_xlabel('Last 60 minutes')
 ax.set_ylabel('Air changes per hour')
 
 # Adding lines to the graph
 threshold_line, = ax.plot([], [], ':', lw=2, label="Threshold")
-line, = ax.plot([], [], lw=2, label="Unit 1")
-line2, = ax.plot([], [], lw=2, label="Unit 2")
-line3, = ax.plot([], [], lw=2, label="Unit 3")
-line4, = ax.plot([], [], lw=2, label="Unit 4")
-line5, = ax.plot([], [], lw=2, label="Unit 5")
+line, = ax.plot([], [], lw=5, label="Unit 1")
+line2, = ax.plot([], [], lw=5, label="Unit 2")
+line3, = ax.plot([], [], lw=5, label="Unit 3")
+line4, = ax.plot([], [], lw=5, label="Unit 4")
+line5, = ax.plot([], [], lw=5, label="Unit 5")
 
 # Set legend
 ax.legend()
