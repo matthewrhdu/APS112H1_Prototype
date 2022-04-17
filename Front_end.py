@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import calculation_module as calc
+from multiprocessing import Process, current_process
 
 # To send warning emails
 gmailUser = 'aps112team144@gmail.com'
@@ -73,6 +74,7 @@ canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.draw()
 canvas.get_tk_widget().grid(row=2, column=1, rowspan=2)
 
+
 def email(i, gmailUser, gmailPassword, recipients, second_warning):
     if not second_warning:
         message = "Warning, unit " + str(i + 1) + " has gone under the threshold for safe air exchange."
@@ -89,7 +91,7 @@ def email(i, gmailUser, gmailPassword, recipients, second_warning):
         msg['To'] = ", ".join(recipients)
         msg['Subject'] = "Riverdale Air Exchange URGENT Warning"
         msg.attach(MIMEText(message))
-        
+
     try:
         mail_server = smtplib.SMTP('smtp.gmail.com', 587)
         mail_server.ehlo()
@@ -101,6 +103,9 @@ def email(i, gmailUser, gmailPassword, recipients, second_warning):
         print('Email sent!')
     except Exception:
         print('Something went wrong...')
+
+    exit(0)
+
 
 # Opens a csv file into a list
 def read_csv(file_name, index):
@@ -162,10 +167,12 @@ def animate(i):
                 time_under_threshold[i] = 0
 
             # Decide which message to send
-            if time_under_threshold[i] == 1:
-                email(i, gmailUser, gmailPassword, recipients, False)
-            elif time_under_threshold[i] == 10:
-                email(i, gmailUser, gmailPassword, recipients, True)
+            if time_under_threshold[i] == 10:
+                email_process = Process(target=email, args=(i, gmailUser, gmailPassword, recipients, False))
+                email_process.start()
+            elif time_under_threshold[i] == 20:
+                email_process = Process(target=email, args=(i, gmailUser, gmailPassword, recipients, True))
+                email_process.start()
 
     resized_image = img.resize((min(screen_width, screen_height) - 50, min(screen_width, screen_height) - 50))
 
@@ -189,7 +196,7 @@ def is_safe(values):
     return safe, times
 
 
-# Graph animation
-anim = animation.FuncAnimation(fig, animate, interval=50, blit=True)
-
-mainloop()
+if current_process().name == 'MainProcess':
+    # Graph animation
+    anim = animation.FuncAnimation(fig, animate, interval=50, blit=True)
+    mainloop()

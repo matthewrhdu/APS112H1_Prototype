@@ -26,8 +26,8 @@ for n in range(1, 6):
             curr_percentage = increment(curr_percentage, 1)
         val1 = curr_percentage + randint(-100, 100) / 100
 
-        if i >= 500:
-            val2 = calc.reverse_rate(val1, (4 + randint(-1000, 1000) / 100000))
+        if i >= 250:
+            val2 = calc.reverse_rate(val1, (3 + randint(-1000, 1000) / 100000))
         else:
             val2 = calc.reverse_rate(val1, (6 + randint(-1000, 1000) / 100000))
         s += f"{round(val1, 2)},{round(val2, 2)}\n"
